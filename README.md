@@ -1,2 +1,7 @@
 # QuickData
-this is a simple lib to store and get data in three simple steps
+
+QuickData is a lightweight, framework-independent Python library to persist runtime parameters automatically.
+
+## Install
+```bash
+pip install QuickData

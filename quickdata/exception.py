@@ -1,0 +1,2 @@
+class QuickDataError(Exception):
+    pass
