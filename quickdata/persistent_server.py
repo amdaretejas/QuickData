@@ -1,44 +1,57 @@
-import os
 import rospy
 from dynamic_reconfigure.server import Server
 from .storage import SQLiteParamStore
+import os
 
 
 class DRPersistentServer:
 
-    def __init__(self, config_class, namespace, user_callback=None):
+    def __init__(self, db_path, config_class, namespace, user_callback=None):
 
-        db_path = os.path.expanduser("~/.ros/motion_params.db")
-        self.store = SQLiteParamStore(db_path)
+        # Stable DB path (VERY IMPORTANT)
+        self.store = SQLiteParamStore(
+            os.path.expanduser("~/.ros/" + db_path)
+        )
 
         self.config_class = config_class
         self.namespace = namespace
         self.user_callback = user_callback
 
+        self._initialized = False   # 🔥 KEY FLAG
+
+        # Start server
         self.server = Server(self.config_class, self._wrapped_callback)
 
-        rospy.sleep(0.1)  # 🔥 IMPORTANT
+        # Let DR finish its internal init
+        rospy.sleep(0.2)
+
+        # Load DB and inject values
         self._load_and_apply()
 
+        # Mark system ready
+        self._initialized = True
+
     def _load_and_apply(self):
-
-        defaults = {}
-        for k, v in self.config_class.defaults.items():
-            defaults[k] = v
-
         values = {}
-        for key in defaults:
+
+        for key, default in self.config_class.defaults.items():
             db_key = f"{self.namespace}.{key}"
-            values[key] = self.store.get(db_key, defaults[key])
+            values[key] = self.store.get(db_key, default)
 
         self.server.update_configuration(values)
 
     def _wrapped_callback(self, config, level):
 
+        # ❌ Ignore callbacks before init is complete
+        if not self._initialized:
+            return config
+
+        # ✅ Persist values AFTER init
         for key, value in config.__dict__.items():
             if not key.startswith("_"):
                 self.store.set(f"{self.namespace}.{key}", value)
 
+        # Call user callback
         if self.user_callback:
             return self.user_callback(config, level)
 
