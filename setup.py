@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="QuickData",
-    version="1.0.0",
+    version="0.2.0",
     author="Tejas Amdare",
     author_email="amdaretejas1@gmail.com",
     description="This is a simple lib to store and get data in three simple steps",
