@@ -10,16 +10,16 @@ class ParamStore:
     Framework independent (no ROS).
     """
 
-    def __init__( * , self, db_path="quickdata.db", configConfig, callback):
+    def __init__(self, db_path="quickdata.db"):
         self.db_path = db_path
-        self.configConfig = configConfig
-        self.callback = callback
+        # self.configConfig = configConfig
+        # self.callback = callback
         self._lock = threading.Lock()
         self._init_db()
         self.server = None
 
     def _init_db(self):
-        self.server = Server(self.configConfig, self.callback)
+        # self.server = Server(self.configConfig, self.callback)
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS parameters (
@@ -57,9 +57,6 @@ class ParamStore:
             if not row:
                 return default
             return json.loads(row[0])
-
-    def update_value(para):
-        pass
 
     def get_all(self):
         """Return all stored parameters."""
