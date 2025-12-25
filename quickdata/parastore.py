@@ -3,7 +3,7 @@ import json
 import time
 import threading
 from dynamic_reconfigure.server import Server
-from storage import SQLiteParamStore
+from .storage import SQLiteParamStore
 from copy import deepcopy
 
 class ParamStore:
