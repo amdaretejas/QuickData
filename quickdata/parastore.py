@@ -7,10 +7,11 @@ from .storage import SQLiteParamStore
 from copy import deepcopy
 
 class ParamStore:
-    def __init__(self, configFile, key, dbName="params.db"):
+    def __init__(self, configFile, key, callback = None, dbName="params.db"):
         self.key = key
         print("This is config file: ")
         self.database = SQLiteParamStore(dbName)
+        self.user_callback = callback
         self.server = Server(configFile, self._callback_function)
         self.default = True
 
@@ -29,4 +30,6 @@ class ParamStore:
                 if parameters["groups"]["parameters"][values] != parameters[values]:
                     self.database.set(f"{self.key}.{values}", parameters[values])
                 self.config[values] = self.database.get(f"{self.key}.{values}", parameters["groups"]["parameters"][values])
+        if self.user_callback:
+            self.user_callback(self.config, level)
         return parameters
